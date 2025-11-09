@@ -9,13 +9,14 @@ use App\Http\Controllers\OrderProductController;
 use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AuthController;
 
 // Public routes
 // User authentication routes
-Route::post('register', [UserController::class, 'register']);
-Route::post('login', [UserController::class, 'login']);
-Route::post('password/email', [UserController::class, 'sendResetLinkEmail']);
-Route::post('password/reset', [UserController::class, 'reset']);
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [AuthController::class, 'reset']);
 
 // Category routes
 Route::get('categories', [CategoryController::class, 'index']);
@@ -55,5 +56,5 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::post('carts/create-order', [CartController::class, 'createOrder']);
     
     // User logout
-    Route::post('logout', [UserController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout']);
 });
