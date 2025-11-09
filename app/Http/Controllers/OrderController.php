@@ -73,14 +73,6 @@ class OrderController extends Controller
         $validatedData = $request->validated();
         $order->update($validatedData);
         
-        // Если статус был изменен, создаем запись в истории заказа
-        if (isset($validatedData['status'])) {
-            $order->history()->create([
-                'status' => $validatedData['status'],
-                'changed_at' => now()
-            ]);
-        }
-        
         return response()->json($order->load(['user', 'products', 'payment', 'history']));
     }
 

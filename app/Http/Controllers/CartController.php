@@ -93,45 +93,4 @@ class CartController extends Controller
         return response()->json(null, 204);
     }
     
-    /**
-     * Create an order from the cart.
-     */
-    public function createOrder(Request $request)
-    {
-        // Получаем все товары из корзины пользователя
-        $cartItems = Cart::where('user_id', $request->user()->id)->with('product')->get();
-        
-        if ($cartItems->isEmpty()) {
-            return response()->json(['error' => 'Cart is empty'], 400);
-        }
-        
-        // Рассчитываем общую сумму заказа
-        $total = 0;
-        foreach ($cartItems as $item) {
-            $total += $item->product->price * $item->quantity;
-        }
-        
-        // Создаем заказ
-        $order = Order::create([
-            'user_id' => $request->user()->id,
-            'status' => 'pending',
-            'total' => $total
-        ]);
-        
-        // Создаем записи о продуктах в заказе
-        foreach ($cartItems as $item) {
-            OrderProduct::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->price
-            ]);
-            
-        }
-        
-        // Очищаем корзину
-        Cart::where('user_id', $request->user()->id)->delete();
-        
-        return response()->json($order->load('products'), 201);
-    }
 }

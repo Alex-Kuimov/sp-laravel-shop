@@ -45,14 +45,8 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     // OrderPayment routes
     Route::apiResource('order-payments', OrderPaymentController::class);
     
-    // OrderHistory routes
-    Route::apiResource('order-histories', OrderHistoryController::class);
-    
     // Cart routes
     Route::apiResource('carts', CartController::class);
-    
-    // Create order from cart
-    Route::post('carts/create-order', [CartController::class, 'createOrder']);
     
     // User logout
     Route::post('logout', [AuthController::class, 'logout']);

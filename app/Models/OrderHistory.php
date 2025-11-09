@@ -13,8 +13,8 @@ class OrderHistory extends Model
      */
     protected $fillable = [
         'order_id',
+        'user_id',
         'status',
-        'changed_at',
     ];
     
     /**
@@ -32,5 +32,13 @@ class OrderHistory extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+    
+    /**
+     * Get the user for the history.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
