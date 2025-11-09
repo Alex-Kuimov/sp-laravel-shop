@@ -65,12 +65,21 @@ class OrderController extends Controller
      */
     public function update(OrderRequest $request, Order $order)
     {
-        // Проверяем, что пользователь имеет право обновлять заказ
-        if (!auth()->user()->can('update', $order)) {
+        // Только админ может обновлять заказ
+        if (!auth()->user()->isAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
-        $order->update($request->validated());
+        $validatedData = $request->validated();
+        $order->update($validatedData);
+        
+        // Если статус был изменен, создаем запись в истории заказа
+        if (isset($validatedData['status'])) {
+            $order->history()->create([
+                'status' => $validatedData['status'],
+                'changed_at' => now()
+            ]);
+        }
         
         return response()->json($order->load(['user', 'products', 'payment', 'history']));
     }
@@ -90,28 +99,4 @@ class OrderController extends Controller
         return response()->json(null, 204);
     }
     
-    /**
-     * Update the status of the order.
-     */
-    public function updateStatus(Request $request, Order $order)
-    {
-        // Только админы могут менять статус заказа
-        if (!auth()->user()->isAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        
-        $request->validate([
-            'status' => 'required|string'
-        ]);
-        
-        $order->update(['status' => $request->status]);
-        
-        // Создаем запись в истории заказа
-        $order->history()->create([
-            'status' => $request->status,
-            'changed_at' => now()
-        ]);
-        
-        return response()->json($order->load(['user', 'products', 'payment', 'history']));
-    }
 }

@@ -38,7 +38,6 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     
     // Order routes
     Route::apiResource('orders', OrderController::class);
-    Route::post('orders/{order}/status', [OrderController::class, 'updateStatus']);
     
     // OrderProduct routes
     Route::apiResource('order-products', OrderProductController::class);
