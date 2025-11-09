@@ -19,8 +19,8 @@ class Product extends Model implements HasMedia
         'name',
         'description',
         'price',
-        'stock',
         'category_id',
+        'status',
     ];
     
     /**
@@ -30,7 +30,6 @@ class Product extends Model implements HasMedia
      */
     protected $casts = [
         'price' => 'decimal:2',
-        'stock' => 'integer',
     ];
     
     /**

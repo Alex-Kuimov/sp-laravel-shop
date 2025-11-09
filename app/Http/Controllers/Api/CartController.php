@@ -127,8 +127,6 @@ class CartController extends Controller
                 'price' => $item->product->price
             ]);
             
-            // Уменьшаем количество товара на складе
-            $item->product->decrement('stock', $item->quantity);
         }
         
         // Очищаем корзину
