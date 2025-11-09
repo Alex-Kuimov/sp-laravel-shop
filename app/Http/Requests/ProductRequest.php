@@ -21,13 +21,13 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
+            'name'           => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'price'          => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'image'       => 'nullable|image|max:2048', // Максимальный размер 2MB
-            'status'      => 'required|in:active,inactive',
+            'category_id'    => 'required|exists:categories,id',
+            'image'          => 'nullable|image|max:2048', // Максимальный размер 2MB
+            'status'         => 'required|in:active,inactive',
         ];
     }
 }

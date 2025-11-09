@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderProduct;
 use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
+use App\Http\Requests\OrderStoreRequest;
 use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
@@ -42,7 +43,7 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(OrderRequest $request)
+    public function store(OrderStoreRequest $request)
     {
         // Получаем все товары из корзины пользователя
         $cartItems = Cart::where('user_id', $request->user()->id)->with('product')->get();
@@ -127,3 +128,4 @@ class OrderController extends Controller
     }
     
 }
+

@@ -1,59 +1,188 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SP-Shop API Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This document describes the REST API endpoints available in the SP-Shop application.
 
-## About Laravel
+## Authentication
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Register
+- **POST** `/api/auth/register`
+- Register a new user
+- **Parameters:**
+  - `name` (string, required)
+  - `email` (string, required)
+  - `password` (string, required, min:8)
+  - `password_confirmation` (string, required)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Login
+- **POST** `/api/auth/login`
+- Authenticate a user
+- **Parameters:**
+  - `email` (string, required)
+  - `password` (string, required)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Send Password Reset Link
+- **POST** `/api/auth/password/email`
+- Send a password reset link to the user's email
+- **Parameters:**
+  - `email` (string, required)
 
-## Learning Laravel
+### Reset Password
+- **POST** `/api/auth/password/reset`
+- Reset user's password
+- **Parameters:**
+  - `token` (string, required)
+  - `email` (string, required)
+  - `password` (string, required, min:8)
+  - `password_confirmation` (string, required)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Logout
+- **POST** `/api/logout`
+- Logout the authenticated user
+- **Authentication:** Required (Bearer Token)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Public Routes
 
-## Laravel Sponsors
+### Categories
+- **GET** `/api/categories`
+- Get a list of all categories with pagination
+- **Query Parameters:**
+  - `name` (string, optional) - Filter by category name
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **GET** `/api/categories/{category}`
+- Get details of a specific category
 
-### Premium Partners
+### Products
+- **GET** `/api/products`
+- Get a list of all products with pagination
+- **Query Parameters:**
+  - `name` (string, optional) - Filter by product name
+  - `category_id` (integer, optional) - Filter by category
+  - `min_price` (numeric, optional) - Filter by minimum price
+  - `max_price` (numeric, optional) - Filter by maximum price
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **GET** `/api/products/{product}`
+- Get details of a specific product
 
-## Contributing
+## Protected Routes
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+All protected routes require authentication with a Bearer Token.
 
-## Code of Conduct
+### Users
+- **GET** `/api/users`
+- Get a list of all users (Admin only)
+- **Query Parameters:**
+  - `page` (integer, optional) - Page number for pagination
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- **POST** `/api/users`
+- Create a new user (Admin only)
+- **Parameters:**
+  - `name` (string, required)
+  - `email` (string, required)
+  - `password` (string, required, min:8)
+  - `password_confirmation` (string, required)
+  - `role` (string, required, in:admin,customer)
 
-## Security Vulnerabilities
+- **GET** `/api/users/{user}`
+- Get details of a specific user
+- Users can only view their own profile, admins can view any user
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **PUT/PATCH** `/api/users/{user}`
+- Update a user's information
+- Users can only update their own profile, admins can update any user
+- **Parameters:**
+  - `name` (string, optional)
+  - `email` (string, optional)
+  - `password` (string, optional, min:8)
+  - `password_confirmation` (string, optional)
+  - `role` (string, optional, in:admin,customer) - Admin only
 
-## License
+- **DELETE** `/api/users/{user}`
+- Delete a user (Admin only)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Categories
+- **POST** `/api/categories`
+- Create a new category (Admin only)
+- **Parameters:**
+  - `name` (string, required)
+  - `description` (string, optional)
+  - `image` (file, optional) - Category image
+
+- **PUT/PATCH** `/api/categories/{category}`
+- Update a category (Admin only)
+- **Parameters:**
+  - `name` (string, optional)
+  - `description` (string, optional)
+  - `image` (file, optional) - Category image
+
+- **DELETE** `/api/categories/{category}`
+- Delete a category (Admin only)
+
+### Products
+- **POST** `/api/products`
+- Create a new product (Admin only)
+- **Parameters:**
+  - `name` (string, required)
+  - `description` (string, required)
+  - `price` (numeric, required)
+  - `discount_price` (numeric, optional)
+  - `category_id` (integer, required)
+  - `image` (file, optional) - Product image
+
+- **PUT/PATCH** `/api/products/{product}`
+- Update a product (Admin only)
+- **Parameters:**
+  - `name` (string, optional)
+  - `description` (string, optional)
+  - `price` (numeric, optional)
+  - `discount_price` (numeric, optional)
+  - `category_id` (integer, optional)
+  - `image` (file, optional) - Product image
+
+- **DELETE** `/api/products/{product}`
+- Delete a product (Admin only)
+
+### Orders
+- **GET** `/api/orders`
+- Get a list of orders
+- Customers see only their own orders, admins can see all orders
+- **Query Parameters:**
+  - `status` (string, optional) - Filter by order status
+  - `user_id` (integer, optional) - Filter by user (Admin only)
+
+- **POST** `/api/orders`
+- Create a new order from cart items
+- Automatically calculates total from cart items
+
+- **GET** `/api/orders/{order}`
+- Get details of a specific order
+- Users can only view their own orders, admins can view any order
+
+- **PUT/PATCH** `/api/orders/{order}`
+- Update an order (Admin only)
+- **Parameters:**
+  - `status` (string, optional) - Order status
+
+- **DELETE** `/api/orders/{order}`
+- Delete an order
+- Users can only delete their own orders, admins can delete any order
+
+### Cart
+- **GET** `/api/carts`
+- Get all items in the authenticated user's cart
+
+- **POST** `/api/carts`
+- Add a product to the cart
+- **Parameters:**
+  - `product_id` (integer, required)
+  - `quantity` (integer, required, min:1)
+
+- **GET** `/api/carts/{cart}`
+- Get details of a specific cart item
+
+- **PUT/PATCH** `/api/carts/{cart}`
+- Update a cart item
+- **Parameters:**
+  - `quantity` (integer, required, min:1)
+
+- **DELETE** `/api/carts/{cart}`
+- Remove an item from the cart
