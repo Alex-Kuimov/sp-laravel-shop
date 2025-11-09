@@ -32,7 +32,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         // Только админ может создавать пользователей
-        if (auth()->user()->role !== 'admin') {
+        if (!auth()->user()->isAdmin()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         
@@ -42,14 +42,14 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,customer',
         ]);
-
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
-
+        
         return response()->json($user, 201);
     }
 
@@ -76,7 +76,7 @@ class UserController extends Controller
         // Пользователь может редактировать только себя, админ может редактировать любого
         $user = User::findOrFail($id);
         
-        if (auth()->user()->role !== 'admin' && auth()->id() !== $user->id) {
+        if (!auth()->user()->isAdmin() && auth()->id() !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         
@@ -86,14 +86,14 @@ class UserController extends Controller
             'password' => 'sometimes|string|min:8|confirmed',
             'role' => 'sometimes|in:admin,customer',
         ]);
-
+        
         $user->update($request->only(['name', 'email', 'password', 'role']));
         
         if ($request->has('password')) {
             $user->password = Hash::make($request->password);
             $user->save();
         }
-
+        
         return $user;
     }
 
@@ -103,13 +103,13 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         // Только админ может удалять пользователей
-        if (auth()->user()->role !== 'admin') {
+        if (!auth()->user()->isAdmin()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         
         $user = User::findOrFail($id);
         $user->delete();
-
+        
         return response()->json(['message' => 'User deleted successfully']);
     }
     

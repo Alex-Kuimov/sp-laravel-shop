@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
@@ -32,6 +32,8 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
+        $this->authorize('create', Category::class);
+        
         $category = Category::create($request->validated());
         
         // Обработка загрузки изображений
@@ -55,6 +57,8 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
+        $this->authorize('update', $category);
+        
         $category->update($request->validated());
         
         // Обработка загрузки изображений
@@ -73,6 +77,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        $this->authorize('delete', $category);
+        
         // Удаляем изображения
         $category->clearMediaCollection('images');
         

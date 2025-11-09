@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
@@ -47,6 +47,8 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+        $this->authorize('create', Product::class);
+        
         $product = Product::create($request->validated());
         
         // Обработка загрузки изображений
@@ -70,6 +72,8 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, Product $product)
     {
+        $this->authorize('update', $product);
+        
         $product->update($request->validated());
         
         // Обработка загрузки изображений
@@ -88,6 +92,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        $this->authorize('delete', $product);
+        
         // Удаляем изображения
         $product->clearMediaCollection('images');
         
