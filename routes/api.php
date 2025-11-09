@@ -10,15 +10,30 @@ use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\CartController;
 
+// Public routes
+// User authentication routes
+Route::post('register', [UserController::class, 'register']);
+Route::post('login', [UserController::class, 'login']);
+Route::post('password/email', [UserController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [UserController::class, 'reset']);
+
+// Category routes
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{category}', [CategoryController::class, 'show']);
+
+// Product routes
+Route::get('products', [ProductController::class, 'index']);
+Route::get('products/{product}', [ProductController::class, 'show']);
+
 Route::middleware(['api', 'auth:sanctum'])->group(function () {
     // User routes
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class)->except(['store', 'index', 'show']);
     
     // Category routes
-    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
     
     // Product routes
-    Route::apiResource('products', ProductController::class);
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     
     // Order routes
     Route::apiResource('orders', OrderController::class);
@@ -38,4 +53,7 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     
     // Create order from cart
     Route::post('carts/create-order', [CartController::class, 'createOrder']);
+    
+    // User logout
+    Route::post('logout', [UserController::class, 'logout']);
 });
