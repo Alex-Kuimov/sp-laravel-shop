@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderRequest;
+use App\Models\Cart;
 use App\Models\Order;
+use App\Models\OrderProduct;
 use Illuminate\Http\Request;
+use App\Http\Requests\OrderRequest;
+use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
 {
@@ -42,9 +44,40 @@ class OrderController extends Controller
      */
     public function store(OrderRequest $request)
     {
-        $order = Order::create($request->validated());
+        // Получаем все товары из корзины пользователя
+        $cartItems = Cart::where('user_id', $request->user()->id)->with('product')->get();
         
-        return response()->json($order, 201);
+        if ($cartItems->isEmpty()) {
+            return response()->json(['error' => 'Cart is empty'], 400);
+        }
+        
+        // Рассчитываем общую сумму заказа
+        $total = 0;
+        foreach ($cartItems as $item) {
+            $total += $item->product->price * $item->quantity;
+        }
+        
+        // Создаем заказ
+        $order = Order::create([
+            'user_id' => $request->user()->id,
+            'status' => 'new',
+            'total' => $total
+        ]);
+        
+        // Создаем записи о продуктах в заказе
+        foreach ($cartItems as $item) {
+            OrderProduct::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'price' => $item->product->price
+            ]);
+        }
+        
+        // Очищаем корзину
+        Cart::where('user_id', $request->user()->id)->delete();
+        
+        return response()->json($order->load('products'), 201);
     }
 
     /**

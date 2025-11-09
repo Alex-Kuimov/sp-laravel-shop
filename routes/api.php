@@ -39,9 +39,6 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     // Order routes
     Route::apiResource('orders', OrderController::class);
     
-    // OrderProduct routes
-    Route::apiResource('order-products', OrderProductController::class);
-    
     // OrderPayment routes
     Route::apiResource('order-payments', OrderPaymentController::class);
     
