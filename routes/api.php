@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\OrderController;
-use App\Http\Controllers\Api\OrderProductController;
-use App\Http\Controllers\Api\OrderPaymentController;
-use App\Http\Controllers\Api\OrderHistoryController;
-use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderProductController;
+use App\Http\Controllers\OrderPaymentController;
+use App\Http\Controllers\OrderHistoryController;
+use App\Http\Controllers\CartController;
 
 Route::middleware(['api', 'auth:sanctum'])->group(function () {
     // User routes
