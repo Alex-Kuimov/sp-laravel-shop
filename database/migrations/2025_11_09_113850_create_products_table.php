@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
+            $table->decimal('discount_price', 10, 2)->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('status')->default('active');
             $table->timestamps();

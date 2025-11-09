@@ -23,7 +23,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         
-        return User::all();
+        return User::paginate(10);
     }
 
     /**

@@ -54,7 +54,8 @@ class OrderController extends Controller
         // Рассчитываем общую сумму заказа
         $total = 0;
         foreach ($cartItems as $item) {
-            $total += $item->product->price * $item->quantity;
+            $price = $item->product->discount_price ?? $item->product->price;
+            $total += $price * $item->quantity;
         }
         
         // Создаем заказ
@@ -66,11 +67,12 @@ class OrderController extends Controller
         
         // Создаем записи о продуктах в заказе
         foreach ($cartItems as $item) {
+            $price = $item->product->discount_price ?? $item->product->price;
             OrderProduct::create([
                 'order_id' => $order->id,
                 'product_id' => $item->product_id,
                 'quantity' => $item->quantity,
-                'price' => $item->product->price
+                'price' => $price
             ]);
         }
         
