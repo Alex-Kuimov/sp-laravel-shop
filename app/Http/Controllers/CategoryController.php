@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -15,15 +14,15 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $query = Category::query();
-        
+
         // Фильтрация по имени
         if ($request->has('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
-        
+
         // Пагинация
         $categories = $query->paginate(10);
-        
+
         return response()->json($categories);
     }
 
@@ -32,15 +31,17 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        $this->authorize('create', Category::class);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $category = Category::create($request->validated());
-        
+
         // Обработка загрузки изображений
         if ($request->hasFile('image')) {
             $category->addMediaFromRequest('image')->toMediaCollection('images');
         }
-        
+
         return response()->json($category, 201);
     }
 
@@ -57,10 +58,12 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        $this->authorize('update', $category);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $category->update($request->validated());
-        
+
         // Обработка загрузки изображений
         if ($request->hasFile('image')) {
             // Удаляем старые изображения
@@ -68,7 +71,7 @@ class CategoryController extends Controller
             // Добавляем новое изображение
             $category->addMediaFromRequest('image')->toMediaCollection('images');
         }
-        
+
         return response()->json($category->load('media'));
     }
 
@@ -77,13 +80,15 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $this->authorize('delete', $category);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         // Удаляем изображения
         $category->clearMediaCollection('images');
-        
+
         $category->delete();
-        
+
         return response()->json(null, 204);
     }
 }

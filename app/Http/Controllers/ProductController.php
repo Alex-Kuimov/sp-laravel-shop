@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -15,30 +14,30 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with('category');
-        
+
         // Фильтрация по имени
         if ($request->has('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
-        
+
         // Фильтрация по категории
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-        
+
         // Фильтрация по цене (минимальная цена)
         if ($request->has('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
-        
+
         // Фильтрация по цене (максимальная цена)
         if ($request->has('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
-        
+
         // Пагинация
         $products = $query->paginate(10);
-        
+
         return response()->json($products);
     }
 
@@ -47,15 +46,17 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        $this->authorize('create', Product::class);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $product = Product::create($request->validated());
-        
+
         // Обработка загрузки изображений
         if ($request->hasFile('image')) {
             $product->addMediaFromRequest('image')->toMediaCollection('images');
         }
-        
+
         return response()->json($product->load('category'), 201);
     }
 
@@ -72,10 +73,12 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, Product $product)
     {
-        $this->authorize('update', $product);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $product->update($request->validated());
-        
+
         // Обработка загрузки изображений
         if ($request->hasFile('image')) {
             // Удаляем старые изображения
@@ -83,7 +86,7 @@ class ProductController extends Controller
             // Добавляем новое изображение
             $product->addMediaFromRequest('image')->toMediaCollection('images');
         }
-        
+
         return response()->json($product->load(['category', 'media']));
     }
 
@@ -92,13 +95,15 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        $this->authorize('delete', $product);
-        
+        if (! auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         // Удаляем изображения
         $product->clearMediaCollection('images');
-        
+
         $product->delete();
-        
+
         return response()->json(null, 204);
     }
 }

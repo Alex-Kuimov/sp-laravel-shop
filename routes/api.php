@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 // User authentication routes
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
-Route::post('password/email', [AuthController::class, 'sendResetLinkEmail']);
-Route::post('password/reset', [AuthController::class, 'reset']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/password/email', [AuthController::class, 'sendResetLinkEmail']);
+Route::post('/auth/password/reset', [AuthController::class, 'reset']);
 
 // Category routes
 Route::get('categories', [CategoryController::class, 'index']);

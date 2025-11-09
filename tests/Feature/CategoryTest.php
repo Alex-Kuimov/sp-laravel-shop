@@ -1,10 +1,10 @@
 <?php
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
@@ -19,11 +19,23 @@ class CategoryTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    '*' => ['id', 'name', 'description', 'status']
+                'current_page',
+                'data'  => [
+                    '*' => ['id', 'name', 'description', 'status'],
                 ],
-                'links',
-                'meta'
+                'first_page_url',
+                'from',
+                'last_page',
+                'last_page_url',
+                'links' => [
+                    '*' => ['url', 'label', 'active'],
+                ],
+                'next_page_url',
+                'path',
+                'per_page',
+                'prev_page_url',
+                'to',
+                'total',
             ]);
     }
 
@@ -36,10 +48,10 @@ class CategoryTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'id' => $category->id,
-                'name' => $category->name,
+                'id'          => $category->id,
+                'name'        => $category->name,
                 'description' => $category->description,
-                'status' => $category->status,
+                'status'      => $category->status,
             ]);
     }
 
@@ -51,18 +63,23 @@ class CategoryTest extends TestCase
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->postJson('/api/categories', [
-                'name' => 'Test Category',
+                'name'        => 'Test Category',
                 'description' => 'Test Description',
-                'status' => 'active',
+                'status'      => 'active',
             ]);
 
         $response->assertStatus(201)
-            ->assertJson([
-                'name' => 'Test Category',
-                'description' => 'Test Description',
-                'status' => 'active',
-            ]);
-        
+            ->assertJsonStructure([
+                'id',
+                'name',
+                'status',
+                'description',
+                'created_at',
+                'updated_at',
+            ])
+            ->assertJsonPath('name', 'Test Category')
+            ->assertJsonPath('description', 'Test Description');
+
         $this->assertDatabaseHas('categories', ['name' => 'Test Category']);
     }
 
@@ -70,13 +87,13 @@ class CategoryTest extends TestCase
     public function it_cannot_create_a_category_as_customer()
     {
         $customer = User::factory()->create(['role' => 'customer']);
-        $token = $customer->createToken('test-token')->plainTextToken;
+        $token    = $customer->createToken('test-token')->plainTextToken;
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->postJson('/api/categories', [
-                'name' => 'Test Category',
+                'name'        => 'Test Category',
                 'description' => 'Test Description',
-                'status' => 'active',
+                'status'      => 'active',
             ]);
 
         $response->assertStatus(403);
@@ -87,22 +104,22 @@ class CategoryTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $token = $admin->createToken('test-token')->plainTextToken;
-        
+
         $category = Category::factory()->create();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->putJson('/api/categories/' . $category->id, [
-                'name' => 'Updated Category',
+                'name'        => 'Updated Category',
                 'description' => 'Updated Description',
-                'status' => 'inactive',
+                'status'      => 'inactive',
             ]);
 
         $response->assertStatus(200)
             ->assertJson([
-                'id' => $category->id,
-                'name' => 'Updated Category',
+                'id'          => $category->id,
+                'name'        => 'Updated Category',
                 'description' => 'Updated Description',
-                'status' => 'inactive',
+                'status'      => 'inactive',
             ]);
     }
 
@@ -110,15 +127,15 @@ class CategoryTest extends TestCase
     public function it_cannot_update_a_category_as_customer()
     {
         $customer = User::factory()->create(['role' => 'customer']);
-        $token = $customer->createToken('test-token')->plainTextToken;
-        
+        $token    = $customer->createToken('test-token')->plainTextToken;
+
         $category = Category::factory()->create();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->putJson('/api/categories/' . $category->id, [
-                'name' => 'Updated Category',
+                'name'        => 'Updated Category',
                 'description' => 'Updated Description',
-                'status' => 'inactive',
+                'status'      => 'inactive',
             ]);
 
         $response->assertStatus(403);
@@ -129,7 +146,7 @@ class CategoryTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $token = $admin->createToken('test-token')->plainTextToken;
-        
+
         $category = Category::factory()->create();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
@@ -143,8 +160,8 @@ class CategoryTest extends TestCase
     public function it_cannot_delete_a_category_as_customer()
     {
         $customer = User::factory()->create(['role' => 'customer']);
-        $token = $customer->createToken('test-token')->plainTextToken;
-        
+        $token    = $customer->createToken('test-token')->plainTextToken;
+
         $category = Category::factory()->create();
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)

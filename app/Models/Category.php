@@ -21,16 +21,7 @@ class Category extends Model implements HasMedia
         'description',
         'status',
     ];
-    
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'status' => 'string',
-    ];
-    
+        
     /**
      * Get the products for the category.
      */
