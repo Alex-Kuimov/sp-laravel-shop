@@ -40,5 +40,5 @@ Route::middleware(['api', 'auth:sanctum'])->group(function () {
     Route::apiResource('carts', CartController::class);
 
     // User logout
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
