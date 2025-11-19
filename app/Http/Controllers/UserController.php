@@ -13,14 +13,16 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $page = $request['page'] ?? 1;
+
         // Только админ может просматривать всех пользователей
         if (auth()->user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return User::paginate(10);
+        return User::orderBy('id', 'desc')->paginate(2, ['*'], 'page', $page);
     }
 
     /**
@@ -37,7 +39,7 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:admin,customer',
+            'role'     => 'required|in:admin,user',
         ]);
 
         $user = User::create([
