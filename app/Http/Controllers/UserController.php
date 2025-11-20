@@ -28,7 +28,7 @@ class UserController extends Controller
                 $q->where('id', $search)
                     ->orWhere('name', 'like', '%' . $search . '%');
             })
-            ->paginate(2, ['*'], 'page', $page);
+            ->paginate(12, ['*'], 'page', $page);
     }
 
     /**

@@ -46,13 +46,27 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $user = User::where('email', $request->email)->first();
+        
+        if (! $user) {
             return response()->json([
-                'message' => 'Invalid login details',
-            ], 401);
+                'message' => 'The selected email is invalid.',
+                'errors' => [
+                    'email' => ['The selected email is invalid.']
+                ]
+            ], 422);
         }
 
-        $user  = User::where('email', $request->email)->firstOrFail();
+        if (! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => [
+                    'password' => ['The password is incorrect.']
+                ]
+            ], 422);
+        }
+
+        Auth::login($user);
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
