@@ -21,12 +21,4 @@ class Category extends Model implements HasMedia
         'description',
         'status',
     ];
-        
-    /**
-     * Get the products for the category.
-     */
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
 }

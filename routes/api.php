@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,25 +16,12 @@ Route::post('/auth/password/reset', [AuthController::class, 'reset']);
 Route::get('categories', [CategoryController::class, 'index']);
 Route::get('categories/{category}', [CategoryController::class, 'show']);
 
-// Product routes
-Route::get('products', [ProductController::class, 'index']);
-Route::get('products/{product}', [ProductController::class, 'show']);
-
 Route::middleware(['api', 'auth:sanctum'])->group(function () {
     // User routes
     Route::apiResource('users', UserController::class);
 
     // Category routes
     Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
-
-    // Product routes
-    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
-
-    // Order routes
-    Route::apiResource('orders', OrderController::class);
-
-    // Cart routes
-    Route::apiResource('carts', CartController::class);
 
     // User logout
     Route::post('/auth/logout', [AuthController::class, 'logout']);
