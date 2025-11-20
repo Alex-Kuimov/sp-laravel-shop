@@ -15,14 +15,20 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $page = $request['page'] ?? 1;
+        $page   = $request['page'] ?? 1;
+        $search = $request['search'] ?? '';
 
         // Только админ может просматривать всех пользователей
         if (auth()->user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return User::orderBy('id', 'desc')->paginate(2, ['*'], 'page', $page);
+        return User::orderBy('id', 'desc')
+            ->where(function ($q) use ($search) {
+                $q->where('id', $search)
+                    ->orWhere('name', 'like', '%' . $search . '%');
+            })
+            ->paginate(2, ['*'], 'page', $page);
     }
 
     /**
