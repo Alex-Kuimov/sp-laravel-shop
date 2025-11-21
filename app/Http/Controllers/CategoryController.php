@@ -6,26 +6,25 @@ use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
+    protected CategoryService $categoryService;
+
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Category::query();
-
-        // Фильтрация по имени
-        if ($request->has('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
-        }
-
-        // Пагинация
-        $categories = $query->paginate(10);
-
+        $categories = $this->categoryService->getCategories($request->name ?? null);
         return new CategoryCollection($categories);
     }
 
@@ -34,18 +33,16 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        if (! Gate::allows('create', Category::class)) {
+        if (! $this->categoryService->canCreate()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $category = Category::create($request->validated());
+        $category = $this->categoryService->createCategory(
+            $request->validated(),
+            $request->file('image')
+        );
 
-        // Обработка загрузки изображений
-        if ($request->hasFile('image')) {
-            $category->addMediaFromRequest('image')->toMediaCollection('images');
-        }
-
-        return new CategoryResource($category);
+        return new CategoryResource($category->load('media'));
     }
 
     /**
@@ -61,19 +58,15 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        if (! Gate::allows('update', $category)) {
+        if (! $this->categoryService->canUpdate($category)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $category->update($request->validated());
-
-        // Обработка загрузки изображений
-        if ($request->hasFile('image')) {
-            // Удаляем старые изображения
-            $category->clearMediaCollection('images');
-            // Добавляем новое изображение
-            $category->addMediaFromRequest('image')->toMediaCollection('images');
-        }
+        $category = $this->categoryService->updateCategory(
+            $category,
+            $request->validated(),
+            $request->file('image')
+        );
 
         return new CategoryResource($category->load('media'));
     }
@@ -83,14 +76,11 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        if (! Gate::allows('delete', $category)) {
+        if (! $this->categoryService->canDelete($category)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Удаляем изображения
-        $category->clearMediaCollection('images');
-
-        $category->delete();
+        $this->categoryService->deleteCategory($category);
 
         return response()->json(null, 204);
     }

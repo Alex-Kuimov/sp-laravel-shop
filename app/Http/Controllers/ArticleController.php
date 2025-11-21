@@ -7,17 +7,25 @@ use App\Http\Requests\ArticleStoreRequest;
 use App\Http\Requests\ArticleUpdateRequest;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleCollection;
+use App\Services\ArticleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class ArticleController extends Controller
 {
+    protected ArticleService $articleService;
+
+    public function __construct(ArticleService $articleService)
+    {
+        $this->articleService = $articleService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $articles = Article::with('user')->latest()->paginate(10);
+        $articles = $this->articleService->getArticles();
         return new ArticleCollection($articles);
     }
 
@@ -26,13 +34,7 @@ class ArticleController extends Controller
      */
     public function store(ArticleStoreRequest $request)
     {
-        // Устанавливаем текущего пользователя как автора статьи, если не указан другой пользователь
-        $data = $request->validated();
-        if (!isset($data['user_id'])) {
-            $data['user_id'] = $request->user()->id;
-        }
-        
-        $article = Article::create($data);
+        $article = $this->articleService->createArticle($request->validated(), $request->user());
         return (new ArticleResource($article))->response()->setStatusCode(201);
     }
 
@@ -50,7 +52,7 @@ class ArticleController extends Controller
      */
     public function update(ArticleUpdateRequest $request, Article $article)
     {
-        $article->update($request->validated());
+        $article = $this->articleService->updateArticle($article, $request->validated());
         return new ArticleResource($article);
     }
 
@@ -59,11 +61,11 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        if (!Gate::allows('delete', $article)) {
+        if (! $this->articleService->canDelete($article)) {
             abort(403);
         }
         
-        $article->delete();
+        $this->articleService->deleteArticle($article);
         return response()->noContent();
     }
 }
