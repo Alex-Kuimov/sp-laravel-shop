@@ -15,14 +15,8 @@ class AuthController extends Controller
     /**
      * Register a new user.
      */
-    public function register(Request $request)
+    public function register(AuthRegisterRequest $request)
     {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -39,13 +33,8 @@ class AuthController extends Controller
     /**
      * Login user.
      */
-    public function login(Request $request)
+    public function login(AuthLoginRequest $request)
     {
-        $request->validate([
-            'email'    => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
         $user = User::where('email', $request->email)->first();
         
         if (! $user) {
@@ -77,10 +66,8 @@ class AuthController extends Controller
     /**
      * Send a reset link to the given user.
      */
-    public function sendResetLinkEmail(Request $request)
+    public function sendResetLinkEmail(AuthSendResetLinkRequest $request)
     {
-        $request->validate(['email' => 'required|email']);
-
         $status = Password::sendResetLink(
             $request->only('email')
         );
@@ -93,14 +80,8 @@ class AuthController extends Controller
     /**
      * Reset the given user's password.
      */
-    public function reset(Request $request)
+    public function reset(AuthResetRequest $request)
     {
-        $request->validate([
-            'token'    => 'required',
-            'email'    => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {

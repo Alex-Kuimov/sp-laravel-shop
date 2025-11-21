@@ -2,11 +2,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -19,7 +22,7 @@ class UserController extends Controller
         $search = $request['search'] ?? '';
 
         // Только админ может просматривать всех пользователей
-        if (auth()->user()->role !== 'admin') {
+        if (! Gate::allows('viewAny', User::class)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -34,19 +37,11 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
-        // Только админ может создавать пользователей
-        if (! auth()->user()->isAdmin()) {
+        if (! Gate::allows('create', User::class)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:admin,user',
-        ]);
 
         $user = User::create([
             'name'     => $request->name,
@@ -66,7 +61,7 @@ class UserController extends Controller
         // Пользователь может просматривать только себя, админ может просматривать любого
         $user = User::findOrFail($id);
 
-        if (auth()->user()->role !== 'admin' && auth()->id() !== $user->id) {
+        if (! Gate::allows('view', $user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -76,19 +71,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserUpdateRequest $request, string $id)
     {
-        // Пользователь может редактировать только себя, админ может редактировать любого
         $user = User::findOrFail($id);
 
-        if (! auth()->user()->isAdmin() && auth()->id() !== $user->id) {
+        if (! Gate::allows('update', $user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
-        $request->validate([
-            'name'  => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-        ]);
 
         $user->update($request->only(['name', 'email']));
 
@@ -105,12 +94,12 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        // Только админ может удалять пользователей
-        if (! auth()->user()->isAdmin()) {
+        $user = User::findOrFail($id);
+
+        if (! Gate::allows('delete', $user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $user = User::findOrFail($id);
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully']);
