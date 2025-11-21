@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,12 +28,14 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return User::orderBy('id', 'desc')
+        $users = User::orderBy('id', 'desc')
             ->where(function ($q) use ($search) {
                 $q->where('id', $search)
                     ->orWhere('name', 'like', '%' . $search . '%');
             })
             ->paginate(12, ['*'], 'page', $page);
+
+        return new UserCollection($users);
     }
 
     /**
@@ -50,7 +54,7 @@ class UserController extends Controller
             'role'     => $request->role,
         ]);
 
-        return response()->json($user, 201);
+        return new UserResource($user);
     }
 
     /**
@@ -65,7 +69,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return $user;
+        return new UserResource($user);
     }
 
     /**
@@ -86,7 +90,7 @@ class UserController extends Controller
             $user->save();
         }
 
-        return $user;
+        return new UserResource($user);
     }
 
     /**
