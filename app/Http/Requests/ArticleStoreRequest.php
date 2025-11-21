@@ -2,16 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ArticleStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ArticleRequest extends FormRequest
+class ArticleStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Article::class);
     }
 
     /**
@@ -23,11 +25,14 @@ class ArticleRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:articles,slug,' . $this->article?->id,
+            'slug' => 'required|string|max:255|unique:articles',
             'content' => 'required|string',
             'excerpt' => 'nullable|string|max:500',
-            'is_published' => 'boolean',
-            'user_id' => 'required|exists:users,id',
+            'status' => [
+                'required',
+                Rule::in(ArticleStatus::values()),
+            ],
+            'user_id' => 'sometimes|exists:users,id',
         ];
     }
 }

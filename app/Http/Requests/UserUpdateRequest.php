@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +14,7 @@ class UserUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         // Пользователь может редактировать только себя, админ может редактировать любого
-        $user = $this->route('user');
+        $user = User::find($this->route('user'));
         return auth()->user()->isAdmin() || auth()->id() === $user->id;
     }
 
@@ -24,7 +25,7 @@ class UserUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user = $this->route('user');
+        $user = User::find($this->route('user'));
         
         return [
             'name' => 'sometimes|string|max:255',

@@ -29,7 +29,7 @@ class ArticleFactory extends Factory
             'slug' => Str::slug($title),
             'content' => $this->faker->paragraphs(5, true),
             'excerpt' => $this->faker->sentence(),
-            'is_published' => $this->faker->boolean(80), // 80% chance of being published
+            'status' => $this->faker->randomElement(['draft', 'published', 'archived']),
             'user_id' => User::factory(),
         ];
     }

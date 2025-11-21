@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ArticleStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,7 +20,7 @@ class Article extends Model
         'slug',
         'content',
         'excerpt',
-        'is_published',
+        'status',
         'user_id',
     ];
 
@@ -28,9 +29,12 @@ class Article extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'is_published' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status' => ArticleStatus::class,
+        ];
+    }
 
     /**
      * Get the user that owns the article.

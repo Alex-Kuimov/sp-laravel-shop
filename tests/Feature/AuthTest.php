@@ -49,7 +49,7 @@ class AuthTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/logout');
+            ->postJson('/api/auth/logout');
 
         $response->assertStatus(200)
             ->assertJson(['message' => 'Logged out successfully']);

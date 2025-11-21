@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AuthLoginRequest;
+use App\Http\Requests\AuthRegisterRequest;
+use App\Http\Requests\AuthResetRequest;
+use App\Http\Requests\AuthSendResetLinkRequest;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -26,7 +30,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -59,7 +64,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 

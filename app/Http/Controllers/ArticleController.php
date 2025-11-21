@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use App\Http\Requests\ArticleRequest;
+use App\Http\Requests\ArticleStoreRequest;
+use App\Http\Requests\ArticleUpdateRequest;
+use App\Http\Resources\ArticleResource;
+use App\Http\Resources\ArticleCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ArticleController extends Controller
 {
@@ -14,16 +18,22 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::with('user')->latest()->paginate(10);
-        return response()->json($articles);
+        return new ArticleCollection($articles);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ArticleRequest $request)
+    public function store(ArticleStoreRequest $request)
     {
-        $article = Article::create($request->validated());
-        return response()->json($article, 201);
+        // Устанавливаем текущего пользователя как автора статьи, если не указан другой пользователь
+        $data = $request->validated();
+        if (!isset($data['user_id'])) {
+            $data['user_id'] = $request->user()->id;
+        }
+        
+        $article = Article::create($data);
+        return (new ArticleResource($article))->response()->setStatusCode(201);
     }
 
     /**
@@ -32,16 +42,16 @@ class ArticleController extends Controller
     public function show(Article $article)
     {
         $article->load('user');
-        return response()->json($article);
+        return new ArticleResource($article);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ArticleRequest $request, Article $article)
+    public function update(ArticleUpdateRequest $request, Article $article)
     {
         $article->update($request->validated());
-        return response()->json($article);
+        return new ArticleResource($article);
     }
 
     /**
@@ -49,7 +59,11 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        if (!Gate::allows('delete', $article)) {
+            abort(403);
+        }
+        
         $article->delete();
-        return response()->json(null, 204);
+        return response()->noContent();
     }
 }

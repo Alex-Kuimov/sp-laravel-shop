@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('content');
             $table->text('excerpt')->nullable();
-            $table->boolean('is_published')->default(false);
+            $table->string('status')->default('draft');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
