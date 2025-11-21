@@ -1,7 +1,9 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Enums\CategoryStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CategoryRequest extends FormRequest
 {
@@ -22,7 +24,10 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name'        => 'required|string|max:255',
-            'status'      => 'required|in:active,inactive',
+            'status'      => [
+                'required',
+                Rule::in(CategoryStatus::values()),
+            ],
             'description' => 'nullable|string',
             'image'       => 'nullable|image|max:2048', // Максимальный размер 2MB
         ];

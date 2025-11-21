@@ -3,8 +3,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
+use App\Http\Resources\CategoryCollection;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
@@ -23,7 +26,7 @@ class CategoryController extends Controller
         // Пагинация
         $categories = $query->paginate(10);
 
-        return response()->json($categories);
+        return new CategoryCollection($categories);
     }
 
     /**
@@ -31,7 +34,7 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! Gate::allows('create', Category::class)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -42,7 +45,7 @@ class CategoryController extends Controller
             $category->addMediaFromRequest('image')->toMediaCollection('images');
         }
 
-        return response()->json($category, 201);
+        return new CategoryResource($category);
     }
 
     /**
@@ -50,7 +53,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return response()->json($category->load('media'));
+        return new CategoryResource($category->load('media'));
     }
 
     /**
@@ -58,7 +61,7 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! Gate::allows('update', $category)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -72,7 +75,7 @@ class CategoryController extends Controller
             $category->addMediaFromRequest('image')->toMediaCollection('images');
         }
 
-        return response()->json($category->load('media'));
+        return new CategoryResource($category->load('media'));
     }
 
     /**
@@ -80,7 +83,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        if (! auth()->user()->isAdmin()) {
+        if (! Gate::allows('delete', $category)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CategoryStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -21,4 +22,16 @@ class Category extends Model implements HasMedia
         'description',
         'status',
     ];
+    
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => CategoryStatus::class,
+        ];
+    }
 }
