@@ -7,14 +7,20 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -24,16 +30,11 @@ class UserController extends Controller
         $search = $request['search'] ?? '';
 
         // Только админ может просматривать всех пользователей
-        if (! Gate::allows('viewAny', User::class)) {
+        if (! $this->userService->canViewAny()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $users = User::orderBy('id', 'desc')
-            ->where(function ($q) use ($search) {
-                $q->where('id', $search)
-                    ->orWhere('name', 'like', '%' . $search . '%');
-            })
-            ->paginate(12, ['*'], 'page', $page);
+        $users = $this->userService->getUsers($page, $search);
 
         return new UserCollection($users);
     }
@@ -43,16 +44,11 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        if (! Gate::allows('create', User::class)) {
+        if (! $this->userService->canCreate()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
-        ]);
+        $user = $this->userService->createUser($request->only(['name', 'email', 'password', 'role']));
 
         return new UserResource($user);
     }
@@ -65,7 +61,7 @@ class UserController extends Controller
         // Пользователь может просматривать только себя, админ может просматривать любого
         $user = User::findOrFail($id);
 
-        if (! Gate::allows('view', $user)) {
+        if (! $this->userService->canView($user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -79,16 +75,11 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (! Gate::allows('update', $user)) {
+        if (! $this->userService->canUpdate($user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $user->update($request->only(['name', 'email']));
-
-        if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
-            $user->save();
-        }
+        $user = $this->userService->updateUser($user, $request->only(['name', 'email', 'password']));
 
         return new UserResource($user);
     }
@@ -100,11 +91,11 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (! Gate::allows('delete', $user)) {
+        if (! $this->userService->canDelete($user)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $user->delete();
+        $this->userService->deleteUser($user);
 
         return response()->json(['message' => 'User deleted successfully']);
     }

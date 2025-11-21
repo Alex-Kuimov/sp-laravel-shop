@@ -7,25 +7,26 @@ use App\Http\Requests\AuthResetRequest;
 use App\Http\Requests\AuthSendResetLinkRequest;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
     /**
      * Register a new user.
      */
     public function register(AuthRegisterRequest $request)
     {
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = $this->authService->register($request->only(['name', 'email', 'password']));
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -40,32 +41,18 @@ class AuthController extends Controller
      */
     public function login(AuthLoginRequest $request)
     {
-        $user = User::where('email', $request->email)->first();
-        
-        if (! $user) {
+        $result = $this->authService->login($request->email, $request->password);
+
+        if (! $result['success']) {
             return response()->json([
-                'message' => 'The selected email is invalid.',
-                'errors' => [
-                    'email' => ['The selected email is invalid.']
-                ]
+                'message' => $result['message'],
+                'errors' => $result['errors']
             ], 422);
         }
-
-        if (! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => [
-                    'password' => ['The password is incorrect.']
-                ]
-            ], 422);
-        }
-
-        Auth::login($user);
-        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'access_token' => $result['access_token'],
+            'token_type' => $result['token_type'],
         ]);
     }
 
@@ -74,13 +61,11 @@ class AuthController extends Controller
      */
     public function sendResetLinkEmail(AuthSendResetLinkRequest $request)
     {
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $result = $this->authService->sendResetLinkEmail($request->email);
 
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => __($status)])
-            : response()->json(['message' => __($status)], 400);
+        return $result['success']
+            ? response()->json(['message' => $result['message']])
+            : response()->json(['message' => $result['message']], 400);
     }
 
     /**
@@ -88,22 +73,11 @@ class AuthController extends Controller
      */
     public function reset(AuthResetRequest $request)
     {
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->setRememberToken(Str::random(60));
+        $result = $this->authService->reset($request->only('email', 'password', 'password_confirmation', 'token'));
 
-                $user->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => __($status)])
-            : response()->json(['message' => __($status)], 400);
+        return $result['success']
+            ? response()->json(['message' => $result['message']])
+            : response()->json(['message' => $result['message']], 400);
     }
 
     /**
@@ -111,7 +85,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $this->authService->logout($request->user());
 
         return response()->json([
             'message' => 'Logged out successfully',
