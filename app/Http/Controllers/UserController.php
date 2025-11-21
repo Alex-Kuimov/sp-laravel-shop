@@ -6,6 +6,7 @@ use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class UserController extends Controller
 
         // Только админ может просматривать всех пользователей
         if (! $this->userService->canViewAny()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $users = $this->userService->getUsers($page, $search);
@@ -45,7 +46,7 @@ class UserController extends Controller
     public function store(UserStoreRequest $request)
     {
         if (! $this->userService->canCreate()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $user = $this->userService->createUser($request->only(['name', 'email', 'password', 'role']));
@@ -62,7 +63,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         if (! $this->userService->canView($user)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         return new UserResource($user);
@@ -76,7 +77,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         if (! $this->userService->canUpdate($user)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $user = $this->userService->updateUser($user, $request->only(['name', 'email', 'password']));
@@ -92,12 +93,12 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         if (! $this->userService->canDelete($user)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $this->userService->deleteUser($user);
 
-        return response()->json(['message' => 'User deleted successfully']);
+        return ApiResponse::deleted('User deleted successfully');
     }
 
 }

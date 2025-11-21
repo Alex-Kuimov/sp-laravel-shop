@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         if (! $this->categoryService->canCreate()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $category = $this->categoryService->createCategory(
@@ -59,7 +60,7 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, Category $category)
     {
         if (! $this->categoryService->canUpdate($category)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $category = $this->categoryService->updateCategory(
@@ -77,11 +78,11 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         if (! $this->categoryService->canDelete($category)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return ApiResponse::unauthorized();
         }
 
         $this->categoryService->deleteCategory($category);
 
-        return response()->json(null, 204);
+        return ApiResponse::deleted();
     }
 }

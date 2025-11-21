@@ -7,6 +7,7 @@ use App\Http\Requests\ArticleStoreRequest;
 use App\Http\Requests\ArticleUpdateRequest;
 use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleCollection;
+use App\Http\Responses\ApiResponse;
 use App\Services\ArticleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -62,10 +63,10 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         if (! $this->articleService->canDelete($article)) {
-            abort(403);
+            return ApiResponse::unauthorized();
         }
         
         $this->articleService->deleteArticle($article);
-        return response()->noContent();
+        return ApiResponse::deleted();
     }
 }

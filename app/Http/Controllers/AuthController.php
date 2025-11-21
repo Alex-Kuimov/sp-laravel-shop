@@ -6,6 +6,7 @@ use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Requests\AuthResetRequest;
 use App\Http\Requests\AuthSendResetLinkRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Auth\Events\PasswordReset;
@@ -44,10 +45,7 @@ class AuthController extends Controller
         $result = $this->authService->login($request->email, $request->password);
 
         if (! $result['success']) {
-            return response()->json([
-                'message' => $result['message'],
-                'errors' => $result['errors']
-            ], 422);
+            return ApiResponse::validationError($result['errors'], $result['message']);
         }
 
         return response()->json([
@@ -64,8 +62,8 @@ class AuthController extends Controller
         $result = $this->authService->sendResetLinkEmail($request->email);
 
         return $result['success']
-            ? response()->json(['message' => $result['message']])
-            : response()->json(['message' => $result['message']], 400);
+            ? ApiResponse::success(null, $result['message'])
+            : ApiResponse::error($result['message']);
     }
 
     /**
@@ -76,8 +74,8 @@ class AuthController extends Controller
         $result = $this->authService->reset($request->only('email', 'password', 'password_confirmation', 'token'));
 
         return $result['success']
-            ? response()->json(['message' => $result['message']])
-            : response()->json(['message' => $result['message']], 400);
+            ? ApiResponse::success(null, $result['message'])
+            : ApiResponse::error($result['message']);
     }
 
     /**
@@ -87,8 +85,6 @@ class AuthController extends Controller
     {
         $this->authService->logout($request->user());
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return ApiResponse::success(null, 'Logged out successfully');
     }
 }
