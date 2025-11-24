@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,9 +16,13 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'description' => fake()->sentence(),
-            'status' => 'active',
+            'name'            => fake()->word(),
+            'slug'            => fake()->slug(),
+            'description'     => fake()->sentence(),
+            'seo_title'       => fake()->sentence(),
+            'seo_description' => fake()->text(160),
+            'seo_keywords'    => fake()->words(5, true),
+            'status'          => 'active',
         ];
     }
 }

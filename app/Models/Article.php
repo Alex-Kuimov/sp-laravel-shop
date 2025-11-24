@@ -1,10 +1,9 @@
 <?php
-
 namespace App\Models;
 
 use App\Enums\ArticleStatus;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
@@ -20,6 +19,9 @@ class Article extends Model
         'slug',
         'content',
         'excerpt',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
         'status',
         'user_id',
     ];

@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Factories;
 
 use App\Models\Article;
@@ -25,12 +24,15 @@ class ArticleFactory extends Factory
     {
         $title = $this->faker->sentence();
         return [
-            'title' => $title,
-            'slug' => Str::slug($title),
-            'content' => $this->faker->paragraphs(5, true),
-            'excerpt' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement(['draft', 'published', 'archived']),
-            'user_id' => User::factory(),
+            'title'           => $title,
+            'slug'            => Str::slug($title),
+            'content'         => $this->faker->paragraphs(5, true),
+            'excerpt'         => $this->faker->sentence(),
+            'seo_title'       => $this->faker->sentence(),
+            'seo_description' => $this->faker->text(160),
+            'seo_keywords'    => $this->faker->words(5, true),
+            'status'          => $this->faker->randomElement(['draft', 'published', 'archived']),
+            'user_id'         => User::factory(),
         ];
     }
 }

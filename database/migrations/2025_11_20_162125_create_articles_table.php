@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('content');
             $table->text('excerpt')->nullable();
+            $table->string('seo_title')->nullable();
+            $table->text('seo_description')->nullable();
+            $table->text('seo_keywords')->nullable();
             $table->string('status')->default('draft');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use App\Enums\CategoryStatus;
@@ -11,7 +10,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Category extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -19,10 +18,14 @@ class Category extends Model implements HasMedia
      */
     protected $fillable = [
         'name',
+        'slug',
         'description',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
         'status',
     ];
-    
+
     /**
      * Get the attributes that should be cast.
      *
