@@ -60,15 +60,4 @@ class ArticleService
     {
         return $article->delete();
     }
-
-    /**
-     * Проверить права доступа для удаления статьи
-     *
-     * @param Article $article
-     * @return bool
-     */
-    public function canDelete(Article $article): bool
-    {
-        return Gate::allows('delete', $article);
-    }
 }

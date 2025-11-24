@@ -10,8 +10,6 @@ use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -30,11 +28,6 @@ class UserController extends Controller
         $page   = $request['page'] ?? 1;
         $search = $request['search'] ?? '';
 
-        // Только админ может просматривать всех пользователей
-        if (! $this->userService->canViewAny()) {
-            return ApiResponse::unauthorized();
-        }
-
         $users = $this->userService->getUsers($page, $search);
 
         return new UserCollection($users);
@@ -45,10 +38,6 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        if (! $this->userService->canCreate()) {
-            return ApiResponse::unauthorized();
-        }
-
         $user = $this->userService->createUser($request->only(['name', 'email', 'password', 'role']));
 
         return new UserResource($user);
@@ -62,10 +51,6 @@ class UserController extends Controller
         // Пользователь может просматривать только себя, админ может просматривать любого
         $user = User::findOrFail($id);
 
-        if (! $this->userService->canView($user)) {
-            return ApiResponse::unauthorized();
-        }
-
         return new UserResource($user);
     }
 
@@ -75,10 +60,6 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, string $id)
     {
         $user = User::findOrFail($id);
-
-        if (! $this->userService->canUpdate($user)) {
-            return ApiResponse::unauthorized();
-        }
 
         $user = $this->userService->updateUser($user, $request->only(['name', 'email', 'password']));
 
@@ -92,13 +73,8 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (! $this->userService->canDelete($user)) {
-            return ApiResponse::unauthorized();
-        }
-
         $this->userService->deleteUser($user);
 
         return ApiResponse::deleted('User deleted successfully');
     }
-
 }

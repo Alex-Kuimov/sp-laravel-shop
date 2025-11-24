@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -15,22 +14,10 @@ class UserCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'data' => $this->collection,
-            'links' => [
-                'first' => $this->firstItem() ? $this->url(1) : null,
-                'last' => $this->lastItem() ? $this->url($this->lastPage()) : null,
-                'prev' => $this->previousPageUrl(),
-                'next' => $this->nextPageUrl(),
-            ],
-            'meta' => [
-                'current_page' => $this->currentPage(),
-                'from' => $this->firstItem(),
-                'last_page' => $this->lastPage(),
-                'path' => $this->path(),
-                'per_page' => $this->perPage(),
-                'to' => $this->lastItem(),
-                'total' => $this->total(),
-            ],
+            'data'         => $this->collection,
+            'current_page' => $this->currentPage(),
+            'last_page'    => $this->lastPage(),
+            'total'        => $this->total(),
         ];
     }
 }

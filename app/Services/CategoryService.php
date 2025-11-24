@@ -84,36 +84,4 @@ class CategoryService
         
         return $category->delete();
     }
-
-    /**
-     * Проверить права доступа для создания категории
-     *
-     * @return bool
-     */
-    public function canCreate(): bool
-    {
-        return Gate::allows('create', Category::class);
-    }
-
-    /**
-     * Проверить права доступа для обновления категории
-     *
-     * @param Category $category
-     * @return bool
-     */
-    public function canUpdate(Category $category): bool
-    {
-        return Gate::allows('update', $category);
-    }
-
-    /**
-     * Проверить права доступа для удаления категории
-     *
-     * @param Category $category
-     * @return bool
-     */
-    public function canDelete(Category $category): bool
-    {
-        return Gate::allows('delete', $category);
-    }
 }
