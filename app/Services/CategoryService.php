@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Category;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CategoryService
 {
@@ -15,17 +13,14 @@ class CategoryService
      * @param string|null $name
      * @return LengthAwarePaginator
      */
-    public function getCategories(?string $name): LengthAwarePaginator
+    public function getCategories(int $page, string $search): LengthAwarePaginator
     {
-        $query = Category::query();
-
-        // Фильтрация по имени
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        }
-
-        // Пагинация
-        return $query->paginate(10);
+        return Category::orderBy('id', 'desc')
+            ->where(function ($q) use ($search) {
+                $q->where('id', $search)
+                    ->orWhere('name', 'like', '%' . $search . '%');
+            })
+            ->paginate(12, ['*'], 'page', $page);
     }
 
     /**
@@ -81,7 +76,7 @@ class CategoryService
     {
         // Удаляем изображения
         $category->clearMediaCollection('images');
-        
+
         return $category->delete();
     }
 }

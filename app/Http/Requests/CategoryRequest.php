@@ -23,13 +23,17 @@ class CategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
-            'status'      => [
+            'name'            => 'required|string|max:255',
+            'slug'            => 'required|string|max:255|unique:categories,slug',
+            'status'          => [
                 'required',
                 Rule::in(CategoryStatus::values()),
             ],
-            'description' => 'nullable|string',
-            'image'       => 'nullable|image|max:2048', // Максимальный размер 2MB
+            'description'     => 'nullable|string',
+            'seo_title'       => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string|max:160',
+            'seo_keywords'    => 'nullable|string',
+            'image'           => 'nullable|image|max:2048', // Максимальный размер 2MB
         ];
     }
 }

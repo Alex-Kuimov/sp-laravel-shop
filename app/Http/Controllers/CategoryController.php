@@ -9,7 +9,6 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
@@ -25,7 +24,11 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = $this->categoryService->getCategories($request->name ?? null);
+        $page   = $request['page'] ?? 1;
+        $search = $request['search'] ?? '';
+
+        $categories = $this->categoryService->getCategories($page, $search);
+
         return new CategoryCollection($categories);
     }
 
@@ -34,10 +37,6 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        if (! $this->categoryService->canCreate()) {
-            return ApiResponse::unauthorized();
-        }
-
         $category = $this->categoryService->createCategory(
             $request->validated(),
             $request->file('image')
@@ -59,10 +58,6 @@ class CategoryController extends Controller
      */
     public function update(CategoryRequest $request, Category $category)
     {
-        if (! $this->categoryService->canUpdate($category)) {
-            return ApiResponse::unauthorized();
-        }
-
         $category = $this->categoryService->updateCategory(
             $category,
             $request->validated(),
@@ -77,10 +72,6 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        if (! $this->categoryService->canDelete($category)) {
-            return ApiResponse::unauthorized();
-        }
-
         $this->categoryService->deleteCategory($category);
 
         return ApiResponse::deleted();

@@ -1,12 +1,10 @@
 <?php
-
 namespace App\Enums;
 
-enum CategoryStatus: string
-{
-    case ACTIVE = 'active';
-    case INACTIVE = 'inactive';
-    
+enum CategoryStatus: string {
+    case DRAFT     = 'draft';
+    case PUBLISHED = 'published';
+
     /**
      * Получить все возможные значения статусов
      *
