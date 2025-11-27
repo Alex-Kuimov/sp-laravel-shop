@@ -36,6 +36,7 @@ class ArticleStoreRequest extends FormRequest
                 Rule::in(ArticleStatus::values()),
             ],
             'user_id'         => 'sometimes|exists:users,id',
+            'category_id'     => 'required|exists:categories,id',
         ];
     }
 }

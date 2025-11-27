@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Gate;
 
 class ArticleService
 {
@@ -14,9 +12,14 @@ class ArticleService
      *
      * @return LengthAwarePaginator
      */
-    public function getArticles(): LengthAwarePaginator
+    public function getArticles(int $page, string $search): LengthAwarePaginator
     {
-        return Article::with('user')->latest()->paginate(10);
+        return Article::orderBy('id', 'desc')
+            ->where(function ($q) use ($search) {
+                $q->where('id', $search)
+                    ->orWhere('title', 'like', '%' . $search . '%');
+            })
+            ->paginate(12, ['*'], 'page', $page);
     }
 
     /**
@@ -28,11 +31,6 @@ class ArticleService
      */
     public function createArticle(array $data, User $user): Article
     {
-        // Устанавливаем текущего пользователя как автора статьи, если не указан другой пользователь
-        if (!isset($data['user_id'])) {
-            $data['user_id'] = $user->id;
-        }
-        
         return Article::create($data);
     }
 

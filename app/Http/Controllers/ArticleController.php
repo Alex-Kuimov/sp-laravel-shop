@@ -1,16 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Article;
 use App\Http\Requests\ArticleStoreRequest;
 use App\Http\Requests\ArticleUpdateRequest;
-use App\Http\Resources\ArticleResource;
 use App\Http\Resources\ArticleCollection;
+use App\Http\Resources\ArticleResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\Article;
 use App\Services\ArticleService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class ArticleController extends Controller
 {
@@ -24,9 +22,12 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $articles = $this->articleService->getArticles();
+        $page   = $request['page'] ?? 1;
+        $search = $request['search'] ?? '';
+
+        $articles = $this->articleService->getArticles($page, $search);
         return new ArticleCollection($articles);
     }
 
@@ -65,7 +66,7 @@ class ArticleController extends Controller
         if (! $this->articleService->canDelete($article)) {
             return ApiResponse::unauthorized();
         }
-        
+
         $this->articleService->deleteArticle($article);
         return ApiResponse::deleted();
     }

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('seo_keywords')->nullable();
             $table->string('status')->default('draft');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->constrained();
             $table->timestamps();
         });
     }
