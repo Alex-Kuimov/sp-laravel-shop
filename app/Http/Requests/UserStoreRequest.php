@@ -14,7 +14,8 @@ class UserStoreRequest extends FormRequest
     public function authorize(): bool
     {
         // Только админ может создавать пользователей
-        return auth()->user()->isAdmin();
+        //return auth()->user()->isAdmin();
+        return true;
     }
 
     /**

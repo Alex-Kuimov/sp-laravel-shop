@@ -2,7 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\CategoryStoreRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Http\Responses\ApiResponse;
@@ -35,7 +36,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryRequest $request)
+    public function store(CategoryStoreRequest $request)
     {
         $category = $this->categoryService->createCategory(
             $request->validated(),
@@ -56,7 +57,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CategoryRequest $request, Category $category)
+    public function update(CategoryUpdateRequest $request, Category $category)
     {
         $category = $this->categoryService->updateCategory(
             $category,

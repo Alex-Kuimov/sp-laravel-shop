@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Http\Requests;
 
 use App\Enums\CategoryStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CategoryRequest extends FormRequest
+class CategoryStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,7 +30,7 @@ class CategoryRequest extends FormRequest
                 'required',
                 Rule::in(CategoryStatus::values()),
             ],
-            'description'     => 'nullable|string',
+            'description'      => 'nullable|string',
             'seo_title'       => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:160',
             'seo_keywords'    => 'nullable|string',
